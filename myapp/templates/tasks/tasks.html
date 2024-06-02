@@ -1,0 +1,20 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container py-5">
+    <h1>Registrar un Lavado</h1>
+    <p>Para registrar un lavado, por favor sube una foto de la matrícula del coche.</p>
+
+    <form action="{% url 'register_wash' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="licensePlatePhoto" class="form-label">Foto de la Matrícula</label>
+            <input class="form-control" type="file" id="licensePlatePhoto" name="license_plate_photo" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Registrar un Lavado</button>
+    </form>
+</div>
+
+{% endblock %}
