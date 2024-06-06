@@ -3,10 +3,7 @@ runtime: python3
 build:
   commands:
     build:
-      - pip install --upgrade pip
       - pip install -r requirements.txt
-      - python manage.py collectstatic --noinput
-
 run:
   runtime-version: 3.8.16
   command: sh startup.sh
