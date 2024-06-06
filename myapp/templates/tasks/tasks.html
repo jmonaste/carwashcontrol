@@ -7,7 +7,7 @@
     <h1>Registrar un Lavado</h1>
     <p>Para registrar un lavado, por favor sube una foto de la matrícula del coche.</p>
 
-    <form action="{% url 'register_wash' %}" method="post" enctype="multipart/form-data">
+    <form id="washForm" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="mb-3">
             <label for="licensePlatePhoto" class="form-label">Foto de la Matrícula</label>
@@ -15,6 +15,166 @@
         </div>
         <button type="submit" class="btn btn-primary">Registrar un Lavado</button>
     </form>
-</div>
+
+    <!-- Spinner -->
+    <div id="spinner" class="text-center my-3" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <div id="result" class="mt-4" style="display: none;">
+        <div class="alert alert-info" role="alert"></div>
+        <div class="mt-3">
+            <label for="licensePlateText" class="form-label">Texto de la Matrícula Detectada</label>
+            <input type="text" class="form-control" id="licensePlateText" name="license_plate_text">
+        </div>
+        <button id="registerTask" class="btn btn-success mt-3">Registrar</button>
+    </div>
+
+    <div id="uploadedImage" class="mt-4" style="display: none;">
+        <h3>Imagen Cargada</h3>
+        <img id="uploadedImageView" src="" alt="Imagen de la Matrícula" class="img-fluid" style="max-width: 400px; height: auto;">
+        <div id="imageMetadata">
+            <p><strong>Fecha y Hora:</strong> <span id="imageDateTime"></span></p>
+            <p><strong>Latitud:</strong> <span id="imageLatitude"></span></p>
+            <p><strong>Longitud:</strong> <span id="imageLongitude"></span></p>
+        </div>
+    </div>
+    
+
+
+
+
+    <script>
+        document.getElementById('washForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+    
+            let formData = new FormData(this);
+            let csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+            let spinner = document.getElementById('spinner');
+            let resultDiv = document.getElementById('result');
+            let alertDiv = resultDiv.querySelector('.alert');
+            let licensePlateText = document.getElementById('licensePlateText');
+    
+            // Mostrar spinner
+            spinner.style.display = 'block';
+    
+            fetch("{% url 'register_wash' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Ocultar spinner
+                spinner.style.display = 'none';
+    
+                if (data.success) {
+                    alertDiv.classList.remove('alert-danger');
+                    alertDiv.classList.add('alert-info');
+                    alertDiv.textContent = `Matrícula detectada: ${data.license_plate_text}`;
+                    licensePlateText.value = data.license_plate_text;
+
+                    // Acceder a los valores de exif_data
+                    console.log(data.exif_data);
+                    let datetime = data.exif_data.datetime;
+                    let latitude = data.exif_data.latitude;
+                    let longitude = data.exif_data.longitude;
+
+                    // Mostrar los valores en consola
+                    console.log("Fecha y Hora:", datetime);
+                    console.log("Latitud:", latitude);
+                    console.log("Longitud:", longitude);
+    
+                    // Store the image URL in a data attribute for later use
+                    licensePlateText.setAttribute('data-image-url', data.image_url);
+
+                    // Store metadata info for later use
+                    licensePlateText.setAttribute('data-image-datetime', datetime);
+                    licensePlateText.setAttribute('data-image-lat', latitude);
+                    licensePlateText.setAttribute('data-image-long', longitude);
+
+
+
+                } else {
+                    alertDiv.classList.remove('alert-info');
+                    alertDiv.classList.add('alert-danger');
+                    alertDiv.textContent = 'No se pudo detectar la matrícula. Por favor, intente nuevamente.';
+                    licensePlateText.value = '';
+                }
+    
+                resultDiv.style.display = 'block';
+            })
+            .catch(error => {
+                // Ocultar spinner
+                spinner.style.display = 'none';
+                alertDiv.classList.remove('alert-info');
+                alertDiv.classList.add('alert-danger');
+                alertDiv.textContent = 'Hubo un error al procesar la solicitud. Por favor, intente nuevamente.';
+                console.error('Error:', error);
+            });
+        });
+    
+        document.getElementById('registerTask').addEventListener('click', function() {
+            let licensePlateText = document.getElementById('licensePlateText').value;
+            let csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+            let alertDiv = document.querySelector('#result .alert');
+    
+            // Retrieve the image URL from the data attribute
+            let imageUrl = document.getElementById('licensePlateText').getAttribute('data-image-url');
+
+            let imgDatetime = document.getElementById('licensePlateText').getAttribute('data-image-datetime');
+            let imgLat = document.getElementById('licensePlateText').getAttribute('data-image-lat');
+            let imgLong = document.getElementById('licensePlateText').getAttribute('data-image-long');
+
+    
+            fetch("{% url 'create_task' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    'license_plate': licensePlateText,
+                    'imgPathDiv': imageUrl,
+                    'imgDatetime': imgDatetime,
+                    'imgLat': imgLat,
+                    'imgLong': imgLong
+
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alertDiv.classList.remove('alert-danger');
+                    alertDiv.classList.add('alert-info');
+                    alertDiv.textContent = 'Tarea registrada exitosamente.';
+    
+                    // Mostrar la imagen cargada
+                    let uploadedImageDiv = document.getElementById('uploadedImage');
+                    let uploadedImageView = document.getElementById('uploadedImageView');
+                    
+                    uploadedImageView.src = imageUrl;
+                    uploadedImageDiv.style.display = 'block';
+                } else {
+                    alertDiv.classList.remove('alert-info');
+                    alertDiv.classList.add('alert-danger');
+                    alertDiv.textContent = 'Error al registrar la tarea. Por favor, intente nuevamente.';
+                }
+            })
+            .catch(error => {
+                alertDiv.classList.remove('alert-info');
+                alertDiv.classList.add('alert-danger');
+                alertDiv.textContent = 'Hubo un error al procesar la solicitud. Por favor, intente nuevamente.';
+                console.error('Error:', error);
+            });
+        });
+    </script>
+    
 
 {% endblock %}

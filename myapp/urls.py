@@ -20,12 +20,17 @@ urlpatterns = [
 
     path('approval_pending_tasks/<int:task_id>/<str:action>', global_views.task_client_pending, name="task_client_pending"),
     path('tasks/<int:task_id>/delete', global_views.delete_task, name="delete_task"),
-    path('tasks_history/', global_views.tasks_history, name="tasks_history"),
+    path('task_overview/', models_views.task_overview, name="task_overview"),
+
     path('tasks_client_pending/', global_views.tasks_client_pending, name="tasks_client_pending"),
 
     path('tarea/<int:task_id>', models_views.get_task, name="get_task"),
 
-    path('register-wash/', worker_tasks_views.register_wash, name='register_wash'),
+    path('register_wash/', worker_tasks_views.register_wash, name='register_wash'),
+    path('create_task/', worker_tasks_views.create_task, name='create_task'),
+
+    path('download/', models_views.download_page, name='download_page'),
+    path('download_pdf/', models_views.generate_pdf, name='generate_pdf'),
 ]  
 
 
