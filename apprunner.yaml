@@ -2,14 +2,15 @@ version: 1.0
 runtime: python3
 build:
   commands:
-      build:
-        - pip install --upgrade pip
-        - pip install -r requirements.txt
+    build:
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+      - python manage.py collectstatic --noinput
 
 run:
   runtime-version: 3.8.16
   command: 
-    sh startup.sh
-    python manage.py runserver 0.0.0.0:8000
+    - sh startup.sh
+    - python manage.py runserver 0.0.0.0:8000
   network:
     port: 8000
