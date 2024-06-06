@@ -1,29 +1,18 @@
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, logout, authenticate
-from django.shortcuts import get_object_or_404, render, redirect
-from django.db.models import Count, Prefetch, Q
-from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+from django.http import JsonResponse
 from ..models import Task
-from ..forms import createNewTask, WashForm
-from ..decorators import unauthenticated_user, allowed_user
+from ..decorators import allowed_user
 from ..utils import read_license_plate
-from django.db import IntegrityError, connection
 import plotly.express as px
-import numpy as np
 from ultralytics import YOLO
 import cv2
 import os
-from django.utils import timezone
-from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from ..models import Task
-from django.contrib.auth.models import User
 import json
 from datetime import datetime
 from django.conf import settings
-from django.templatetags.static import static
 import piexif
 from PIL import Image
 from PIL import Image

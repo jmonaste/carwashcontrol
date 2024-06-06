@@ -1,22 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from ..models import Task
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from ..models import Task
 from django.db.models import Count
 import json
-from django.http import HttpResponse
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from ..models import Task  # Asegúrate de importar tu modelo Task
-from django.http import HttpResponse
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
-from reportlab.lib.units import inch
-from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors

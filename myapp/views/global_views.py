@@ -1,18 +1,12 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
 from ..models import Task
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.db import IntegrityError
-from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from ..decorators import unauthenticated_user, allowed_user
-from django.db.models import Q  # Import the Q object
-from django.db.models import Count, Prefetch
-import plotly.express as px
-from django.db import connection
 
 
 # Create your views here.
